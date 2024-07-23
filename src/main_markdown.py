@@ -62,6 +62,19 @@ def forecast_display(state):
     state.forecast = generate_forecast_data(state.data, state.n_years)
     notify(state, 's', 'Prediction done! Forecast data has been updated!')
 
+    if len(forecast) == 0 or len(data) == 0:
+        return -1
+    return int((forecast.loc[len(forecast)-1, 'Lower'] - forecast.loc[len(data), 'Lower'])/forecast.loc[len(data), 'Lower']*100)
+
+def pessimistic_forecast_display(forecast, data):
+    if len(forecast) == 0 or len(data) == 0:
+        return -1
+    return int((forecast.loc[len(forecast)-1, 'Lower'] - forecast.loc[len(data), 'Lower'])/forecast.loc[len(data), 'Lower']*100)
+
+def optimistic_forecast_display(forecast, data):
+    if len(forecast) == 0 or len(data) == 0:
+        return -1
+    return int((forecast.loc[len(forecast)-1, 'Upper'] - forecast.loc[len(data), 'Upper'])/forecast.loc[len(data), 'Upper']*100)
 
 
 #### Getting the data, make initial forcast and build a front end web-app with Taipy GUI
@@ -139,9 +152,9 @@ Select number of prediction years: <|{n_years}|>
 ### **Forecast**{: .color-primary} Data
 
 <|1 1|layout|class_name=text-center|
-<|  Pessimistic Forecast {int((forecast.loc[len(forecast)-1, 'Lower'] - forecast.loc[len(data), 'Lower'])/forecast.loc[len(data), 'Lower']*100)}%|text|class_name=h4 card|>
+<|  Pessimistic Forecast {pessimistic_forecast_display(forecast, data)}%|text|class_name=h4 card|>
 
-<|Optimistic Forecast {int((forecast.loc[len(forecast)-1, 'Upper'] - forecast.loc[len(data), 'Upper'])/forecast.loc[len(data), 'Upper']*100)}%|text|class_name=h4 card|>
+<|Optimistic Forecast {optimistic_forecast_display(forecast, data)}%|text|class_name=h4 card|>
 |>
 
 

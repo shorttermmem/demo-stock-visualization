@@ -63,6 +63,15 @@ def forecast_display(state):
     state.forecast = generate_forecast_data(state.data, state.n_years)
     notify(state, 's', 'Prediction done! Forecast data has been updated!')
 
+def pessimistic_forecast_display(forecast, data):
+    if len(forecast) == 0 or len(data) == 0:
+        return -1
+    return int((forecast.loc[len(forecast)-1, 'Lower'] - forecast.loc[len(data), 'Lower'])/forecast.loc[len(data), 'Lower']*100)
+
+def optimistic_forecast_display(forecast, data):
+    if len(forecast) == 0 or len(data) == 0:
+        return -1
+    return int((forecast.loc[len(forecast)-1, 'Upper'] - forecast.loc[len(data), 'Upper'])/forecast.loc[len(data), 'Upper']*100)
 
 
 #### Getting the data, make initial forcast and build a front end web-app with Taipy GUI
@@ -129,9 +138,9 @@ with tgb.Page() as page:
         tgb.text("### Forecast Data", mode="md")
 
         with tgb.layout("1 1", class_name="text-center"):
-            tgb.text("Pessimistic Forecast {int((forecast.loc[len(forecast)-1, 'Lower'] - forecast.loc[len(data), 'Lower'])/forecast.loc[len(data), 'Lower']*100)}%", class_name="h4 card", )
+            tgb.text("Pessimistic Forecast {pessimistic_forecast_display(forecast, data)}%", class_name="h4 card", )
 
-            tgb.text("Optimistic Forecast {int((forecast.loc[len(forecast)-1, 'Upper'] - forecast.loc[len(data), 'Upper'])/forecast.loc[len(data), 'Upper']*100)}%", class_name="h4 card")
+            tgb.text("Optimistic Forecast {optimistic_forecast_display(forecast, data)}%", class_name="h4 card")
 
         tgb.chart("{forecast}", mode="line", x="Date", y__1="Lower", y__2="Upper")
 
