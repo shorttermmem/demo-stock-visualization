@@ -8,13 +8,6 @@ import taipy.gui.builder as tgb
 from plotly import graph_objects as go
 
 
-# Parameters for retrieving the stock data
-start_date = "2015-01-01"
-end_date = date.today().strftime("%Y-%m-%d")
-selected_stock = 'AAPL'
-n_years = 1
-
-
 def get_stock_data(ticker, start, end):
     ticker_data = yf.download(ticker, start, end)  # downloading the stock data from START to TODAY
     ticker_data.reset_index(inplace=True)  # put date in the first column
@@ -73,85 +66,88 @@ def optimistic_forecast_display(forecast, data):
         return -1
     return int((forecast.loc[len(forecast)-1, 'Upper'] - forecast.loc[len(data), 'Upper'])/forecast.loc[len(data), 'Upper']*100)
 
+if __name__ == "__main__":
+    # Parameters for retrieving the stock data
+    start_date = "2015-01-01"
+    end_date = date.today().strftime("%Y-%m-%d")
+    selected_stock = 'AAPL'
+    n_years = 1
 
-#### Getting the data, make initial forcast and build a front end web-app with Taipy GUI
-data = get_stock_data(selected_stock, start_date, end_date)
-forecast = generate_forecast_data(data, n_years)
+    #### Getting the data, make initial forcast and build a front end web-app with Taipy GUI
+    data = get_stock_data(selected_stock, start_date, end_date)
+    forecast = generate_forecast_data(data, n_years)
 
-show_dialog = False
+    show_dialog = False
 
-partial_md = "<|{forecast}|table|>"
-dialog_md = "<|{show_dialog}|dialog|partial={partial}|title=Forecast Data|on_action={lambda state: state.assign('show_dialog', False)}|>"
+    partial_md = "<|{forecast}|table|>"
+    dialog_md = "<|{show_dialog}|dialog|partial={partial}|title=Forecast Data|on_action={lambda state: state.assign('show_dialog', False)}|>"
 
+    with tgb.Page() as page:
+        tgb.toggle(theme=True)
 
-with tgb.Page() as page:
-    tgb.toggle(theme=True)
-
-    tgb.dialog("{show_dialog}",
-                partial="{partial}",
-                title="Forecast Data",
-                on_action="{lambda state: state.assign('show_dialog', False)}")
-    
-    with tgb.part("container"):
-        tgb.text("# Stock Price Analysis Dashboard", mode="md")
-        with tgb.layout("1 2 1", gap="40px", class_name="card"):
-            with tgb.part():
-                tgb.text("#### Selected Period", mode="md")
-                tgb.text("From:")
-                tgb.date("{start_date}", on_change=get_data_from_range)
-                tgb.html("br")
-                tgb.text("To:")
-                tgb.date("{end_date}", on_change=get_data_from_range)
-            with tgb.part():
-                tgb.text("#### Selected Ticker", mode="md")
-                tgb.input(value="{selected_stock}", label="Stock", on_action=get_data_from_range)
-                tgb.html("br")
-
-                tgb.text("or choose a popular one")
-                lov = ["MSFT", "GOOG", "AAPL", "AMZN", "META", "COIN", "AMC", "PYPL"]
-                tgb.toggle(value="{selected_stock}", lov=lov, on_change=get_data_from_range)
-            with tgb.part():
-                tgb.text("#### Prediction years", mode="md")
-                tgb.text("Select number of prediction years: {n_years}")
-                tgb.html("br")
-                tgb.slider("{n_years}", min=1, max=5)
-
-                tgb.button("Predict", on_action=forecast_display, class_name="{'plain' if len(forecast)==0 else ''}")
+        tgb.dialog("{show_dialog}",
+                    partial="{partial}",
+                    title="Forecast Data",
+                    on_action="{lambda state: state.assign('show_dialog', False)}")
         
-        tgb.html("br")
-
-        tgb.chart(figure="{create_candlestick_chart(data)}")
-
-        with tgb.expandable(title="Historical Data", value="Historical Data", expanded=False):
-            with tgb.layout("1 1"):
+        with tgb.part("container"):
+            tgb.text("# Stock Price Analysis Dashboard", mode="md")
+            with tgb.layout("1 2 1", gap="40px", class_name="card"):
                 with tgb.part():
-                    tgb.text("### Historical Closing price", mode="md")
-                    tgb.chart("{data}", mode="line", x="Date", y__1="Open", y__2="Close")
-
+                    tgb.text("#### Selected Period", mode="md")
+                    tgb.text("From:")
+                    tgb.date("{start_date}", on_change=get_data_from_range)
+                    tgb.html("br")
+                    tgb.text("To:")
+                    tgb.date("{end_date}", on_change=get_data_from_range)
                 with tgb.part():
-                    tgb.text("### Historical Daily Trading Volume", mode="md")
-                    tgb.chart("{data}", mode="line", x="Date", y="Volume")
+                    tgb.text("#### Selected Ticker", mode="md")
+                    tgb.input(value="{selected_stock}", label="Stock", on_action=get_data_from_range)
+                    tgb.html("br")
 
-            tgb.text("### Whole Historical Data {selected_stock}", mode="md")
-            tgb.table("{data}")
+                    tgb.text("or choose a popular one")
+                    lov = ["MSFT", "GOOG", "AAPL", "AMZN", "META", "COIN", "AMC", "PYPL"]
+                    tgb.toggle(value="{selected_stock}", lov=lov, on_change=get_data_from_range)
+                with tgb.part():
+                    tgb.text("#### Prediction years", mode="md")
+                    tgb.text("Select number of prediction years: {n_years}")
+                    tgb.html("br")
+                    tgb.slider("{n_years}", min=1, max=5)
 
-        tgb.text("### Forecast Data", mode="md")
+                    tgb.button("Predict", on_action=forecast_display, class_name="{'plain' if len(forecast)==0 else ''}")
+            
+            tgb.html("br")
 
-        with tgb.layout("1 1", class_name="text-center"):
-            tgb.text("Pessimistic Forecast {pessimistic_forecast_display(forecast, data)}%", class_name="h4 card", )
+            tgb.chart(figure="{create_candlestick_chart(data)}")
 
-            tgb.text("Optimistic Forecast {optimistic_forecast_display(forecast, data)}%", class_name="h4 card")
+            with tgb.expandable(title="Historical Data", value="Historical Data", expanded=False):
+                with tgb.layout("1 1"):
+                    with tgb.part():
+                        tgb.text("### Historical Closing price", mode="md")
+                        tgb.chart("{data}", mode="line", x="Date", y__1="Open", y__2="Close")
 
-        tgb.chart("{forecast}", mode="line", x="Date", y__1="Lower", y__2="Upper")
+                    with tgb.part():
+                        tgb.text("### Historical Daily Trading Volume", mode="md")
+                        tgb.chart("{data}", mode="line", x="Date", y="Volume")
 
-        tgb.html("br")
+                tgb.text("### Whole Historical Data {selected_stock}", mode="md")
+                tgb.table("{data}")
 
-        with tgb.part("text-center"):
-            tgb.button("More info", on_action="{lambda s: s.assign('show_dialog', True)}")
+            tgb.text("### Forecast Data", mode="md")
 
+            with tgb.layout("1 1", class_name="text-center"):
+                tgb.text("Pessimistic Forecast {pessimistic_forecast_display(forecast, data)}%", class_name="h4 card", )
 
+                tgb.text("Optimistic Forecast {optimistic_forecast_display(forecast, data)}%", class_name="h4 card")
 
-# Run Taipy GUI
-gui = Gui(page)
-partial = gui.add_partial(partial_md)
-gui.run(dark_mode=False, title="Stock Visualization", port=3002)
+            tgb.chart("{forecast}", mode="line", x="Date", y__1="Lower", y__2="Upper")
+
+            tgb.html("br")
+
+            with tgb.part("text-center"):
+                tgb.button("More info", on_action="{lambda s: s.assign('show_dialog', True)}")
+
+    # Run Taipy GUI
+    gui = Gui(page)
+    partial = gui.add_partial(partial_md)
+    gui.run(dark_mode=False, title="Stock Visualization", port=3002)

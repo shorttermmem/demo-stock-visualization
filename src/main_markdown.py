@@ -5,18 +5,13 @@ from prophet import Prophet
 import pandas as pd
 from plotly import graph_objects as go
 
-# Parameters for retrieving the stock data
-start_date = "2015-01-01"
-end_date = date.today().strftime("%Y-%m-%d")
-selected_stock = 'AAPL'
-n_years = 1
-
 
 def get_stock_data(ticker, start, end):
     ticker_data = yf.download(ticker, start, end)  # downloading the stock data from START to TODAY
     ticker_data.reset_index(inplace=True)  # put date in the first column
     ticker_data['Date'] = pd.to_datetime(ticker_data['Date']).dt.tz_localize(None)
     return ticker_data
+
 
 def get_data_from_range(state):
     print("GENERATING HIST DATA")
@@ -66,27 +61,35 @@ def forecast_display(state):
         return -1
     return int((forecast.loc[len(forecast)-1, 'Lower'] - forecast.loc[len(data), 'Lower'])/forecast.loc[len(data), 'Lower']*100)
 
+
 def pessimistic_forecast_display(forecast, data):
     if len(forecast) == 0 or len(data) == 0:
         return -1
     return int((forecast.loc[len(forecast)-1, 'Lower'] - forecast.loc[len(data), 'Lower'])/forecast.loc[len(data), 'Lower']*100)
+
 
 def optimistic_forecast_display(forecast, data):
     if len(forecast) == 0 or len(data) == 0:
         return -1
     return int((forecast.loc[len(forecast)-1, 'Upper'] - forecast.loc[len(data), 'Upper'])/forecast.loc[len(data), 'Upper']*100)
 
+if __name__ == "__main__":
+    # Parameters for retrieving the stock data
+    start_date = "2015-01-01"
+    end_date = date.today().strftime("%Y-%m-%d")
+    selected_stock = 'AAPL'
+    n_years = 1
 
-#### Getting the data, make initial forcast and build a front end web-app with Taipy GUI
-data = get_stock_data(selected_stock, start_date, end_date)
-forecast = generate_forecast_data(data, n_years)
+    #### Getting the data, make initial forcast and build a front end web-app with Taipy GUI
+    data = get_stock_data(selected_stock, start_date, end_date)
+    forecast = generate_forecast_data(data, n_years)
 
-show_dialog = False
+    show_dialog = False
 
-partial_md = "<|{forecast}|table|>"
-dialog_md = "<|{show_dialog}|dialog|partial={partial}|title=Forecast Data|on_action={lambda state: state.assign('show_dialog', False)}|>"
+    partial_md = "<|{forecast}|table|>"
+    dialog_md = "<|{show_dialog}|dialog|partial={partial}|title=Forecast Data|on_action={lambda state: state.assign('show_dialog', False)}|>"
 
-page = dialog_md + """<|toggle|theme|>
+    page = dialog_md + """<|toggle|theme|>
 <|container|
 # Stock Price **Analysis**{: .color-primary} Dashboard
 
@@ -123,7 +126,6 @@ Select number of prediction years: <|{n_years}|>
 |years>
 
 |>
-
 
 <br/>
 
@@ -162,16 +164,14 @@ Select number of prediction years: <|{n_years}|>
 
 <br/>
 
-
 <|More info|button|on_action={lambda s: s.assign("show_dialog", True)}|>
 {: .text-center}
 |>
 
 <br/>
-"""
+    """
 
-
-# Run Taipy GUI
-gui = Gui(page)
-partial = gui.add_partial(partial_md)
-gui.run(dark_mode=False, title="Stock Visualization", port=2452)
+    # Run Taipy GUI
+    gui = Gui(page)
+    partial = gui.add_partial(partial_md)
+    gui.run(dark_mode=False, title="Stock Visualization", port=2452)
