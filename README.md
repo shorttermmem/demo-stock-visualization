@@ -24,7 +24,7 @@ Taipy is a Python library for creating Business Applications. More information o
 
 ## How to run
 
-This demo works with a Python version superior to 3.8. Install the dependencies of the *Pipfile* and run the *main.py*.
+This demo works with a Python version superior to 3.8. Install the dependencies of the *Pipfile* and run the *main_markdown.py*.
 
 ## Introduction
 Normally, if you want to check out a stock's historical performance like the opening/closing price and trading volume, it is often the case that this is done manually through a google search. Now, using taipy GUI and the yahoo finance library, we could get these informations in just a fraction of a second, visualize it using taipy's tools, and make a dashboard that anyone can use easily. 
