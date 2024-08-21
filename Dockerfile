@@ -20,4 +20,4 @@ RUN pip install -r requirements.txt
 # Copy the application source code.
 COPY src .
 
-CMD ["taipy", "run", "main_markdown.py", "-H", "0.0.0.0", "-P", "5000", "--no-debug", "--no-reloader"]
+CMD ["taipy", "run", "--no-debug", "--no-reloader", "main_markdown.py", "-H", "0.0.0.0", "-P", "5000"]
