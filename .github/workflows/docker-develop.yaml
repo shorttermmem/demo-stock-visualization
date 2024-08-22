@@ -1,7 +1,7 @@
 # This file was automatically generated.
 # Please, do not edit it manually.
 
-name: Build Docker Image
+name: Build Docker Image develop
 
 on:
   release:
@@ -15,7 +15,7 @@ permissions:
 jobs:
   build:
     environment: develop
-    runs-on: stockvisualization
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
