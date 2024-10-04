@@ -214,4 +214,4 @@ Select number of prediction years: <|{n_years}|>
     # Run Taipy GUI
     gui = Gui(page)
     partial = gui.add_partial(partial_md)
-    gui.run(dark_mode=False, title="Stock Visualization", port=2452)
+    gui.run(dark_mode=False, title="Stock Visualization")
