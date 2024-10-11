@@ -40,7 +40,6 @@ def get_data_from_range(state):
     notify(state, "w", "Deleting previous predictions...")
     state.forecast = pd.DataFrame(columns=["Date", "Lower", "Upper"])
 
-
 def create_candlestick_chart(data):
     fig = go.Figure()
     fig.add_trace(
@@ -54,7 +53,9 @@ def create_candlestick_chart(data):
         )
     )
     fig.update_layout(
-        margin=dict(l=30, r=30, b=30, t=30), xaxis_rangeslider_visible=False
+        margin=dict(l=30, r=30, b=30, t=30),
+        xaxis_rangeslider_visible=False,
+        yaxis=dict(side="right")  # Display the price axis on the right side
     )
     return fig
 
